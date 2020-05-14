@@ -378,7 +378,12 @@ class message_t
         int rc = zmq_msg_init_size(&msg, size_);
         if (rc != 0)
             throw error_t();
-        memcpy(data(), data_, size_);
+        if (size_)
+        {
+            // this constructor allows (nullptr, 0),
+            // memcpy with a null pointer is UB
+            memcpy(data(), data_, size_);
+        }
     }
 
     message_t(void *data_, size_t size_, free_fn *ffn_, void *hint_ = ZMQ_NULLPTR)
@@ -1309,19 +1314,19 @@ template<int Opt, int NullTerm = 1> struct array_option
 
 #define ZMQ_DEFINE_INTEGRAL_OPT(OPT, NAME, TYPE)                                    \
     using NAME##_t = integral_option<OPT, TYPE, false>;                             \
-    ZMQ_INLINE_VAR ZMQ_CONSTEXPR_VAR NAME##_t NAME
+    ZMQ_INLINE_VAR ZMQ_CONSTEXPR_VAR NAME##_t NAME{}
 #define ZMQ_DEFINE_INTEGRAL_BOOL_UNIT_OPT(OPT, NAME, TYPE)                          \
     using NAME##_t = integral_option<OPT, TYPE, true>;                              \
-    ZMQ_INLINE_VAR ZMQ_CONSTEXPR_VAR NAME##_t NAME
+    ZMQ_INLINE_VAR ZMQ_CONSTEXPR_VAR NAME##_t NAME{}
 #define ZMQ_DEFINE_ARRAY_OPT(OPT, NAME)                                             \
     using NAME##_t = array_option<OPT>;                                             \
-    ZMQ_INLINE_VAR ZMQ_CONSTEXPR_VAR NAME##_t NAME
+    ZMQ_INLINE_VAR ZMQ_CONSTEXPR_VAR NAME##_t NAME{}
 #define ZMQ_DEFINE_ARRAY_OPT_BINARY(OPT, NAME)                                      \
     using NAME##_t = array_option<OPT, 0>;                                          \
-    ZMQ_INLINE_VAR ZMQ_CONSTEXPR_VAR NAME##_t NAME
+    ZMQ_INLINE_VAR ZMQ_CONSTEXPR_VAR NAME##_t NAME{}
 #define ZMQ_DEFINE_ARRAY_OPT_BIN_OR_Z85(OPT, NAME)                                  \
     using NAME##_t = array_option<OPT, 2>;                                          \
-    ZMQ_INLINE_VAR ZMQ_CONSTEXPR_VAR NAME##_t NAME
+    ZMQ_INLINE_VAR ZMQ_CONSTEXPR_VAR NAME##_t NAME{}
 
 // duplicate definition from libzmq 4.3.3
 #if defined _WIN32
